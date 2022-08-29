@@ -1,6 +1,12 @@
 const express = require("express");
 const User = require("../models/user");
+// const jwt = require("jsonwebtoken");
+// require("dotenv").config();
 const router = express.Router();
+
+// const newToken = (user) => {
+//   return jwt.sign({ user: user }, process.env.JWT_TOKEN_KEY);
+// };
 
 //register
 const register = async (req, res) => {
@@ -13,6 +19,8 @@ const register = async (req, res) => {
       });
     }
     user = await User.create(req.body);
+
+    // const token = newToken(user);
     return res.status(201).json({ user });
   } catch (e) {
     return res.status(500).json({ message: e.message, status: "failed" });
@@ -22,7 +30,7 @@ const register = async (req, res) => {
 //login
 const login = async (req, res) => {
   try {
-    let user = await User.findOne({ email: req.body.email }).lean().exec();
+    let user = await User.findOne({ email: req.body.email });
     if (!user) {
       return res.status(400).json({
         status: "failed",
