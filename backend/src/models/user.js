@@ -10,31 +10,35 @@ const userSchema = Schema(
     username: { type: String, required: true, trim: true },
     email: { type: String, required: true, unique: true },
     password: { type: String, required: true },
-    role: { type: String, enum: ["user", "admin"], default: "admin" },
+    role: { type: String, enum: ["user", "admin"], default: "user" },
   },
-  { timestamps: true }
+  { timestamps: true, versionKey: false }
 );
 
-userSchema.pre("save", function (next) {
+userSchema.pre("save", async function (next) {
   if (!this.isModified("password")) return next();
 
   //const hash = bcrypt.hashSync(this.password,10);
-  bcrypt.hash(this.password, 10, (res, hash) => {
-    this.password = hash;
-    return next();
+  bcrypt.genSalt(10, function (err, salt) {
+    bcrypt.hash(this.password, salt, (err, hash) => {
+      this.password = hash;
+      return next();
+    });
   });
 });
 
-userSchema.methods.checkPassword = function (password) {
-  return new Promise((resolve, reject) => {
-    bcrypt.compare(password, this.password, function (err, same) {
-      // res === true
-      if (err) {
-        return reject(err);
-      }
-      resolve(same);
-    });
-  });
+userSchema.methods.checkPassword = async function (password) {
+  // return new Promise((resolve, reject) => {
+  //   bcrypt.compare(password, this.password, function (err, same) {
+  //     // res === true
+  //     if (err) {
+  //       return reject(err);
+  //     }
+  //     resolve(same);
+  //   });
+  // });
+
+  return bcrypt.compare(password, this.password);
 };
 
 const User = model("user", userSchema);
