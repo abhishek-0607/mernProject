@@ -18,26 +18,27 @@ const userSchema = Schema(
 userSchema.pre("save", function (next) {
   if (!this.isModified("password")) return next();
 
-  //const hash = bcrypt.hashSync(this.password,10);
   bcrypt.hash(this.password, 10, (err, hash) => {
     this.password = hash;
 
     return next();
   });
+  //const hash = bcrypt.hashSync(this.password,10);
+  // this.password = hash;
 });
 
 userSchema.methods.checkPassword = function (password) {
-  // return new Promise((resolve, reject) => {
-  //   bcrypt.compare(password, this.password, function (err, same) {
-  //     // res === true
-  //     if (err) {
-  //       return reject(err);
-  //     }
-  //     resolve(same);
-  //   });
-  // });
+  return new Promise((resolve, reject) => {
+    bcrypt.compare(password, this.password, function (err, same) {
+      // res === true
+      if (err) {
+        return reject(err);
+      }
+      resolve(same);
+    });
+  });
 
-  return bcrypt.compare(password, this.password);
+  // return bcrypt.compare(password, this.password);
 };
 
 const User = model("user", userSchema);
