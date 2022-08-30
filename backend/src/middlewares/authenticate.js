@@ -1,10 +1,16 @@
 const jwt = require("jsonwebtoken");
 
 const verifyToken = (token) => {
-  return jwt.verify(token, process.env.JWT_TOKEN_KEY);
+  return new Promise((resolve, reject) => {
+    jwt.verify(token, process.env.JWT_TOKEN_KEY),
+      function (err, token) {
+        if (err) reject(err);
+        return resolve(token);
+      };
+  });
 };
 
-const authenticate = (req, res, next) => {
+const authenticate = async (req, res, next) => {
   //if we received the bearer token in the header
   const bearerToken = req?.headers?.authorization;
 
@@ -18,7 +24,14 @@ const authenticate = (req, res, next) => {
 
   //else we will try to get user from token
   const token = bearerToken.split(" ")[1];
-  const user = verifyToken(token);
+  let user;
+  try {
+    user = await verifyToken(token);
+  } catch (e) {
+    return res
+      .status(400)
+      .json({ status: "failed", message: "Please provide a valid token" });
+  }
   //if no user found then we will throw an error
   if (!user) {
     return res
