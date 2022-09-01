@@ -1,12 +1,12 @@
 const express = require("express");
 const User = require("../models/user");
-// const jwt = require("jsonwebtoken");
-// require("dotenv").config();
+const jwt = require("jsonwebtoken");
+require("dotenv").config();
 const router = express.Router();
 
-// const newToken = (user) => {
-//   return jwt.sign({ user: user }, process.env.JWT_TOKEN_KEY);
-// };
+const newToken = (user) => {
+  return jwt.sign({ user: user }, process.env.JWT_TOKEN_KEY);
+};
 
 //register
 const register = async (req, res) => {
@@ -20,8 +20,8 @@ const register = async (req, res) => {
     }
     user = await User.create(req.body);
 
-    // const token = newToken(user);
-    return res.status(201).json({ user });
+    const token = newToken(user);
+    return res.status(201).json({ user, token });
   } catch (e) {
     return res.status(500).json({ message: e.message, status: "failed" });
   }
@@ -44,7 +44,9 @@ const login = async (req, res) => {
         message: "Please provide valid email and password",
       });
     }
-    return res.status(201).json({ user });
+    //we will create token
+    const token = newToken(user);
+    return res.status(201).json({ user, token });
   } catch (e) {
     return res.status(500).json({ message: e.message, status: "failed" });
   }

@@ -5,7 +5,7 @@ app.use(express.json());
 
 //route imports
 const productRoutes = require("./controllers/productController");
-const userRoutes = require("./controllers/userController");
+const userRoutes = require("./controllers/authController");
 
 app.use("/api", productRoutes);
 app.use("/api", userRoutes);
